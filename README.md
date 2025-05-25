@@ -1,101 +1,83 @@
-Possible issue:
+## Troubleshooting Common Issues
 
-1. The error you're seeing:
+### 1. Chocolatey Not Recognized
+
+If you see this error:
 ```
 choco : The term 'choco' is not recognized...
 ```
-means Chocolatey (a Windows package manager) is not installed or not added to your system's PATH.
+It means Chocolatey (the Windows package manager) is not installed or not in your system's PATH.
+
+#### How to Install Chocolatey
+
+1. **Open PowerShell as Administrator:**
+    - Click Start (or press `Win + S`)
+    - Type `powershell`
+    - Right-click **Windows PowerShell** and select **Run as Administrator**
+
+2. **Install Chocolatey:**
+    Paste the following into the PowerShell window:
+    ```powershell
+    Set-ExecutionPolicy Bypass -Scope Process -Force; `
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
+    iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    ```
+
+3. **Verify Installation:**
+    - Close PowerShell, open a new terminal, and run:
+      ```powershell
+      choco --version
+      ```
+    - You should see a version number (e.g., `1.4.0`).
+
+4. **(If Needed) Add Chocolatey to PATH for Current Session:**
+    ```powershell
+    $env:Path += ";C:\ProgramData\chocolatey\bin"
+    ```
+    Then install Pulumi:
+    ```powershell
+    choco install pulumi -y
+    ```
 
 ---
 
-## ✅ Here's exactly what to do (step-by-step)
+### 2. Setting Up SSH Key Pair
 
-### 🔵 Step 1: Open **PowerShell** — Not CMD
+To generate and use an SSH key pair for AWS EC2:
 
-1. **Click Start** (or press `Win + S`)
-2. Type: `powershell`
-3. **Right-click** on **Windows PowerShell**
-4. Click **Run as Administrator**
+1. **Generate Key Pair:**
+    ```sh
+    ssh-keygen -t rsa -b 2048 -f app-key-pair
+    ```
+    Press Enter twice when prompted for a passphrase.
 
-> ✅ You must see something like:
->
-> ```
-> Windows PowerShell
-> Copyright (C) ...
-> PS C:\Windows\System32>
-> ```
+2. **Extract Public Key:**
+    ```sh
+    cat app-key-pair.pub
+    ```
+    Copy the entire output (starts with `ssh-rsa`).
 
----
-
-### 🟢 Step 2: Paste this into PowerShell
-
-Copy and paste the **entire block below** into the **PowerShell terminal** (you should see `PS` at the start of the line):
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; `
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
-iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-```
-
-✅ This will download and install **Chocolatey**.
+3. **Update Pulumi Script:**
+    - In your Pulumi `main.py`, find the `aws.ec2.KeyPair` resource and replace the public key with your copied value.
 
 ---
 
-### 🟡 Step 3: Verify Installation
+### 3. Pulumi Access Token Error
 
-After installation completes:
-
-1. Close the PowerShell window
-2. Open a **new terminal** (PowerShell or CMD)
-3. Type:
-
-```powershell
-choco --version
+If you see:
 ```
-
-You should see something like:
-
-```powershell
-1.4.0
-```
-
----
-Please run this in PowerShell:
-
-$env:Path += ";C:\ProgramData\chocolatey\bin"
-Then immediately run:
-
-choco install pulumi -y
-If that works, you’ve fixed the problem for the current session.
-
-
-2. how to Replace with your public key:
-
-Generate an SSH Key Pair:
-```
-ssh-keygen -t rsa -b 2048 -f app-key-pair
-```
-When prompted for a passphrase, just press Enter twice (once for passphrase, once for confirmation).
-
-Extract the Public Key:
-Open the app-key-pair.pub file to get the public key:
-
-cat app-key-pair.pub
-Example output:
-
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC... user@machine
-Copy the entire public key string (starting with ssh-rsa and ending before any trailing whitespace or comments like user@machine).
-
-Update the Pulumi Script:
-In the Pulumi script (main.py), locate the aws.ec2.KeyPair resource.
-
-3. You're seeing this error because Pulumi is expecting you to log in to the Pulumi Cloud, but the access token you entered is either missing or incorrect:
-
 error: invalid access token
-✅ You Have Two Options to Fix This:
-Option 1: Use the Browser-Based Login (Recommended)
-When prompted:
+```
+Pulumi needs you to log in.
 
-Enter your access token from https://app.pulumi.com/account/tokens
-    or hit <ENTER> to log in using your browser:
-Just press <ENTER>, and Pulumi will open a browser window asking you to log in using GitHub, GitLab, etc. Once complete, Pulumi CLI will automatically configure access.
+#### How to Fix
+
+- **Option 1 (Recommended):**  
+  When prompted, just press `<ENTER>` to use browser-based login. Complete authentication in your browser.
+
+- **Option 2:**  
+  Enter a valid access token from https://app.pulumi.com/account/tokens when prompted.
+
+---
+
+For more details, refer to the project documentation or the official Pulumi and Chocolatey guides.
