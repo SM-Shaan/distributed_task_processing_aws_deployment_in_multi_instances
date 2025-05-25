@@ -1,0 +1,146 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    build:
+      context: .
+      dockerfile: Dockerfile.rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-guest}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    build:
+      context: .
+      dockerfile: Dockerfile.redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    image: myapp-web:latest
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@${RABBITMQ_HOST}:5672/
+      - REDIS_URL=redis://${REDIS_HOST}:6379/0
+    volumes:
+      - .:/app:ro
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  default_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.default_worker
+    image: myapp-default-worker:latest
+    command: sh -c "python3 init_queues.py && celery -A tasks worker --loglevel=info -Q default,high_priority,low_priority"
+    environment:
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@${RABBITMQ_HOST}:5672/
+      - CELERY_RESULT_BACKEND=redis://${REDIS_HOST}:6379/0
+    volumes:
+      - .:/app:ro
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  data_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.data_worker
+    image: myapp-data-worker:latest
+    command: sh -c "python3 init_queues.py && celery -A tasks worker --loglevel=info -Q data_processing"
+    environment:
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@${RABBITMQ_HOST}:5672/
+      - CELERY_RESULT_BACKEND=redis://${REDIS_HOST}:6379/0
+    volumes:
+      - .:/app:ro
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  email_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.email_worker
+    image: myapp-email-worker:latest
+    command: sh -c "python3 init_queues.py && celery -A tasks worker --loglevel=info -Q email_sending"
+    environment:
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@${RABBITMQ_HOST}:5672/
+      - CELERY_RESULT_BACKEND=redis://${REDIS_HOST}:6379/0
+    volumes:
+      - .:/app:ro
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  file_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.file_worker
+    image: myapp-file-worker:latest
+    command: sh -c "python3 init_queues.py && celery -A tasks worker --loglevel=info -Q file_processing"
+    environment:
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@${RABBITMQ_HOST}:5672/
+      - CELERY_RESULT_BACKEND=redis://${REDIS_HOST}:6379/0
+    volumes:
+      - .:/app:ro
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile.flower
+    image: myapp-flower:latest
+    ports:
+      - "5555:5555"
+    environment:
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@${RABBITMQ_HOST}:5672/
+      - REDIS_URL=redis://${REDIS_HOST}:6379/0
+    volumes:
+      - .:/app:ro
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  rabbitmq_data:
+  redis_data:
