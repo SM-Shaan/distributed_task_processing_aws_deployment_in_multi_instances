@@ -1,27 +1,26 @@
-```markdown
 # Asynchronous Task Queue Processing System on AWS with Pulumi
 
-> **Table of Contents**
->
-> - [Overview](#overview)
-> - [Project Layout](#project-layout)
-> - [Architecture Diagram](#architecture-diagram)
-> - [Prerequisites](#prerequisites)
-> - [Setup Instructions](#setup-instructions)
->   - [1. Configure AWS CLI](#1-configure-aws-cli)
->   - [2. Set Up Project Directory and Virtual Environment](#2-set-up-project-directory-and-virtual-environment)
->   - [3. Install Pulumi](#3-install-pulumi)
->   - [4. Initialize a Pulumi Project](#4-initialize-a-pulumi-project)
->   - [5. Configure Infrastructure](#5-configure-infrastructure)
->   - [6. Set Up SSH Key Pair](#6-set-up-ssh-key-pair)
->   - [7. Install Dependencies](#7-install-dependencies)
->   - [8. Deploy the Pulumi Stack](#8-deploy-the-pulumi-stack)
-> - [Updating Infrastructure](#updating-infrastructure)
-> - [Destroying Infrastructure](#destroying-infrastructure)
-> - [Best Practices](#best-practices)
-> - [Troubleshooting](#troubleshooting)
-> - [Resources](#resources)
-> - [License](#license)
+ **Table of Contents**
+
+ - [Overview](#overview)
+ - [Project Layout](#project-layout)
+ - [Architecture Diagram](#architecture-diagram)
+ - [Prerequisites](#prerequisites)
+ - [Setup Instructions](#setup-instructions)
+   - [1. Configure AWS CLI](#1-configure-aws-cli)
+   - [2. Set Up Project Directory and Virtual Environment](#2-set-up-project-directory-and-virtual-environment)
+   - [3. Install Pulumi](#3-install-pulumi)
+   - [4. Initialize a Pulumi Project](#4-initialize-a-pulumi-project)
+   - [5. Configure Infrastructure](#5-configure-infrastructure)
+   - [6. Set Up SSH Key Pair](#6-set-up-ssh-key-pair)
+   - [7. Install Dependencies](#7-install-dependencies)
+   - [8. Deploy the Pulumi Stack](#8-deploy-the-pulumi-stack)
+ - [Updating Infrastructure](#updating-infrastructure)
+ - [Destroying Infrastructure](#destroying-infrastructure)
+ - [Best Practices](#best-practices)
+ - [Troubleshooting](#troubleshooting)
+ - [Resources](#resources)
+ - [License](#license)
 
 ## Overview
 
@@ -29,7 +28,7 @@ This project guides you through setting up an asynchronous task queue processing
 
 ## Project Layout
 
-```
+```bash
 asynchronous_task_queue_aws_deployment_in_multi_instances/
 ├── images/
 │   ├── architecture.png
@@ -38,12 +37,12 @@ asynchronous_task_queue_aws_deployment_in_multi_instances/
 │   ├── __main__.py
 │   └── requirements.txt
 ├── README.md
-└── other files
+└── other files...
 ```
 
 ## Architecture Diagram
 
-![System Architecture](images\diagram.svg)
+![System Architecture](images/diagram.svg)
 
 
 ## Prerequisites
