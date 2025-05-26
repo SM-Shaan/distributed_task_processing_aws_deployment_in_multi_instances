@@ -496,7 +496,7 @@ Deploy the infrastructure:
 ```bash
 pulumi up --yes
 ```
-![Review changes](images/pulumi.png)
+![Review changes](images/pulumi2.png)
 ![Review changes](images/pulumi1.png)
 
 Pulumi will:
